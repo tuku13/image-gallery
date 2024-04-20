@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/tuku13/image-gallery/constants"
 	"github.com/tuku13/image-gallery/pages"
 	"io"
 )
@@ -21,7 +22,7 @@ func main() {
 
 	e.GET("/", pages.IndexPage)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }
 
 type Template struct {
