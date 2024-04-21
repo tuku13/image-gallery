@@ -6,8 +6,43 @@
     <meta charset="UTF-8" />
     <title>Image Gallery</title>
   </head>
-  <body class="flex h-[calc(100dvh)] w-full items-center justify-center">
-    Hello World
+  <body class="flex h-dvh w-screen flex-col gap-y-1 pb-4">
+    {{ template "navbar" . }}
+    <div id="searchbar-container" class="flex px-4 pt-2">
+      <div class="w-full rounded-md border border-gray-300">
+        <label for="searchbar"></label>
+        <input
+          name="searchbar"
+          id="searchbar"
+          class="h-12 w-full rounded-md px-4"
+          type="text"
+          placeholder="Search for images"
+        />
+      </div>
+    </div>
+    <div
+      id="control-buttons"
+      class="flex h-10 w-full items-center justify-between px-5"
+    >
+      <label>
+        Order by:
+        <select name="order_by" id="order_by">
+          <option value="date">Date</option>
+          <option value="name">Name</option>
+        </select>
+      </label>
+      <button
+        class="rounded-md border bg-black px-4 py-2 font-semibold text-white"
+      >
+        Upload
+      </button>
+    </div>
+    <div
+      id="images"
+      class="flex h-fit w-screen flex-grow-0 flex-wrap content-start items-start justify-start gap-4 overflow-y-scroll px-4 pb-4"
+    >
+      {{ range .Images }} {{ template "image" . }} {{ end }}
+    </div>
   </body>
 </html>
 {{ end }}
