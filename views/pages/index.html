@@ -18,7 +18,7 @@
     </div>
     <div
       id="control-buttons"
-      class="flex h-10 w-full items-center justify-between px-5"
+      class="flex h-12 w-full items-center justify-between px-5"
     >
       <label>
         Order by:
@@ -28,11 +28,12 @@
         </select>
       </label>
       {{ with .Context}}
-      <button
+      <a
+        href="/upload"
         class="rounded-md border bg-black px-4 py-2 font-semibold text-white"
       >
         Upload
-      </button>
+      </a>
       {{ end }}
     </div>
     <div

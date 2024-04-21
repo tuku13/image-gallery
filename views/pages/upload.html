@@ -1,10 +1,17 @@
 {{ block "upload" .}}
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Upload</title>
-  </head>
-  <body></body>
+  {{ template "head" . }}
+  <body
+    hx-history="false"
+    hx-boost="true"
+    hx-push-url="true"
+    class="flex h-dvh w-screen cursor-default flex-col whitespace-nowrap"
+  >
+    {{ template "navbar" .Context }}
+    <div class="flex h-full w-screen flex-col items-center justify-center">
+      <span class="text-3xl font-bold">Upload page Work In Progress</span>
+    </div>
+  </body>
 </html>
 {{ end }}

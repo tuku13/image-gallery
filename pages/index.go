@@ -1,7 +1,6 @@
 package pages
 
 import (
-	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/tuku13/image-gallery/auth"
@@ -29,7 +28,6 @@ func IndexPage(c echo.Context) error {
 			context = claims
 		}
 	}
-	fmt.Println(context)
 
 	pageData := IndexPageData{
 		Context: context,
