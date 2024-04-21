@@ -3,11 +3,15 @@ package constants
 import "os"
 
 var (
-	PORT = "8080"
+	PORT       = "8080"
+	JWT_SECRET = "SECRET123"
 )
 
 func init() {
 	if envPort, exists := os.LookupEnv("PORT"); exists {
 		PORT = envPort
+	}
+	if envJwtSecret, exists := os.LookupEnv("JWT_SECRET"); exists {
+		JWT_SECRET = envJwtSecret
 	}
 }
