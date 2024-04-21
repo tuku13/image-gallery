@@ -2,7 +2,7 @@ package auth
 
 import (
 	"fmt"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 	"github.com/tuku13/image-gallery/constants"
 	"github.com/tuku13/image-gallery/db"
@@ -22,16 +22,28 @@ type RegisterRequestForm struct {
 	PasswordAgain string `form:"password_again"`
 }
 
+type JwtCustomClaims struct {
+	Name   string `json:"name"`
+	UserID string `json:"userID"`
+	Email  string `json:"email"`
+	jwt.RegisteredClaims
+}
+
 func createJWT(user *db.User, expires time.Time) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": user.Id,
-		"exp": expires.Unix(),
-	})
+	claims := &JwtCustomClaims{
+		Name:   user.Name,
+		UserID: user.Id,
+		Email:  user.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   user.Id,
+			ExpiresAt: jwt.NewNumericDate(expires),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(constants.JWT_SECRET))
 	if err != nil {
 		return "", err
 	}
-
 	return tokenString, nil
 }
 
@@ -61,6 +73,7 @@ func LoginPost(c echo.Context) error {
 	cookie.Path = "/"
 	c.SetCookie(cookie)
 
+	c.Response().Header().Set("HX-Redirect", "/")
 	return c.NoContent(200)
 }
 
@@ -86,9 +99,11 @@ func LogoutPost(c echo.Context) error {
 		}
 	}
 
-	cookie.MaxAge = -1
+	cookie.Expires = time.Now().Add(-1 * time.Hour)
 	cookie.Value = ""
+	cookie.Path = "/"
 	c.SetCookie(cookie)
 
+	c.Response().Header().Set("HX-Redirect", "/")
 	return c.NoContent(200)
 }

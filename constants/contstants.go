@@ -3,8 +3,9 @@ package constants
 import "os"
 
 var (
-	PORT       = "8080"
-	JWT_SECRET = "SECRET123"
+	PORT        = "8080"
+	JWT_SECRET  = "SECRET123"
+	CONTEXT_KEY = "context"
 )
 
 func init() {
@@ -13,5 +14,8 @@ func init() {
 	}
 	if envJwtSecret, exists := os.LookupEnv("JWT_SECRET"); exists {
 		JWT_SECRET = envJwtSecret
+	}
+	if envContextKey, exists := os.LookupEnv("CONTEXT_KEY"); exists {
+		CONTEXT_KEY = envContextKey
 	}
 }

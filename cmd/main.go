@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/golang-jwt/jwt/v5"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,30 +23,35 @@ func main() {
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 	}))
-	e.Use(auth.ContextMiddleware)
-
 	e.Static("/static", "static")
 
+	jwtMiddleware := echojwt.WithConfig(echojwt.Config{
+		SigningKey:  []byte(constants.JWT_SECRET),
+		TokenLookup: "cookie:auth",
+		ContextKey:  constants.CONTEXT_KEY,
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(auth.JwtCustomClaims)
+		},
+	})
+	checkJwtMiddleware := func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			cookie, err := c.Cookie("auth")
+			if err == nil && cookie.Value != "" {
+				return jwtMiddleware(next)(c)
+			}
+			return next(c)
+		}
+	}
+
 	public := e.Group("")
+	public.Use(checkJwtMiddleware)
 	public.GET("/", pages.IndexPage)
+	public.GET("/login", pages.LoginPage)
 	public.POST("/auth/login", auth.LoginPost)
 	public.POST("/auth/register", auth.RegisterPost)
 
 	private := e.Group("")
-	private.Use(echojwt.WithConfig(echojwt.Config{
-		SigningKey:  []byte(constants.JWT_SECRET),
-		TokenLookup: "cookie:auth",
-		ContextKey:  "context",
-		ErrorHandler: func(c echo.Context, err error) error {
-			// print cookies
-			cookies := c.Cookies()
-			for _, cookie := range cookies {
-				fmt.Println(cookie.Name + ":" + cookie.Value)
-			}
-			return c.String(401, "Unauthorized")
-		},
-	}))
-
+	private.Use(jwtMiddleware)
 	private.GET("/upload", pages.UploadPage)
 	private.POST("/auth/logout", auth.LogoutPost)
 

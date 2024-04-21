@@ -1,15 +1,10 @@
 {{ block "index" . }}
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Image Gallery</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="/static/tailwindcss.css" />
-  </head>
+  {{ template "head" . }}
   <body class="flex h-dvh w-screen flex-col gap-y-1 pb-4">
-    {{ template "navbar" . }}
-    <div id="searchbar-container" class="flex px-4 pt-2">
+    {{ template "navbar" .Context }}
+    <div id="searchbar-container" class="flex flex-shrink-0 px-4 pt-2">
       <div class="w-full rounded-md border border-gray-300">
         <label for="searchbar"></label>
         <input
@@ -32,11 +27,13 @@
           <option value="name">Name</option>
         </select>
       </label>
+      {{ with .Context}}
       <button
         class="rounded-md border bg-black px-4 py-2 font-semibold text-white"
       >
         Upload
       </button>
+      {{ end }}
     </div>
     <div
       id="images"
