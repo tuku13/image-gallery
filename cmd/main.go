@@ -48,6 +48,7 @@ func main() {
 	public.GET("/", pages.IndexPage)
 	public.GET("/login", pages.LoginPage)
 	public.POST("/auth/login", auth.LoginPost)
+	public.GET("/register", pages.RegisterPage)
 	public.POST("/auth/register", auth.RegisterPost)
 
 	private := e.Group("")

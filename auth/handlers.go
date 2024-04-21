@@ -83,11 +83,29 @@ func RegisterPost(c echo.Context) error {
 		return c.String(400, "Bad Request")
 	}
 
-	if err := c.Validate(registerRequest); err != nil {
-		return c.String(400, "Bad Request")
+	// TODO Mock user
+	user := db.GetUser(registerRequest.Email)
+	if user == nil {
+		return c.String(401, "Unauthorized")
+	}
+	// TODO
+
+	expires := time.Now().Add(1 * time.Hour)
+	jwtString, err := createJWT(user, expires)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Could not create JWT token")
 	}
 
-	return c.String(200, "Login Request Post")
+	// Set the token in a cookie
+	cookie := new(http.Cookie)
+	cookie.Name = "auth"
+	cookie.Value = jwtString
+	cookie.Expires = expires
+	cookie.Path = "/"
+	c.SetCookie(cookie)
+
+	c.Response().Header().Set("HX-Redirect", "/")
+	return c.NoContent(200)
 }
 
 func LogoutPost(c echo.Context) error {
