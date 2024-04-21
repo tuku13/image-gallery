@@ -17,6 +17,9 @@ func main() {
 
 	e.Renderer = newTemplate()
 	e.Use(middleware.Logger())
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Level: 5,
+	}))
 
 	e.Static("/static", "static")
 
