@@ -1,0 +1,15 @@
+{{ block "image-uploader" . }}
+<div id="image-uploader" class="flex h-[400px] w-full flex-col">
+  <input
+    id="image"
+    name="image"
+    style="display: none"
+    type="file"
+    hx-encoding="multipart/form-data"
+    hx-post="/upload-page/select-image"
+    hx-target="#image-uploader-control"
+    hx-swap="outerHTML"
+  />
+  {{ template "image-uploader-control-empty" . }}
+</div>
+{{ end }}

@@ -1,0 +1,24 @@
+{{ block "image-uploader-control-filled" . }}
+<div id="image-uploader-control">
+  <label
+    for="image"
+    class="flex h-[400px] w-full items-center justify-center rounded-md border border-gray-200 bg-green-100 hover:cursor-pointer hover:border-green-600"
+  >
+    <span class="flex flex-col items-center gap-y-1">
+      <img src="/static/icons/check.svg" alt="icon" class="h-6 w-6" />
+      <span class="text-lg">Image selected</span>
+    </span>
+  </label>
+  <div
+    hx-post="/upload-page/deselect-image"
+    hx-target="#image-uploader"
+    hx-swap="outerHTML"
+    class="mt-1 flex items-center gap-x-2 rounded-md border px-2 py-3 hover:cursor-pointer hover:bg-gray-100"
+  >
+    <img src="/static/icons/paper-clip.svg" alt="icon" class="h-4 w-4" />
+    <span>Image selected: {{ .Filename }}</span>
+    <div class="w-full"></div>
+    <img src="/static/icons/x.svg" alt="icon" class="h-5 w-5" />
+  </div>
+</div>
+{{ end }}

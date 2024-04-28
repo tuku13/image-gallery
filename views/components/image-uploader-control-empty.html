@@ -1,0 +1,20 @@
+{{ block "image-uploader-control-empty" . }}
+<div id="image-uploader-control">
+  <label
+    for="image"
+    class="flex h-[400px] w-full items-center justify-center rounded-md border border-gray-200 bg-gray-100 hover:cursor-pointer hover:bg-gray-200"
+  >
+    <span class="flex flex-col items-center gap-y-1">
+      <img src="/static/icons/upload.svg" alt="icon" class="h-6 w-6" />
+      <span class="text-lg"
+        >Drag your image here or
+        <span class="text-blue-400">click to upload</span></span
+      >
+    </span>
+  </label>
+  <div class="flex items-center gap-x-2 px-2 py-3">
+    <img src="/static/icons/paper-clip.svg" alt="icon" class="h-4 w-4" />
+    <span>No images added</span>
+  </div>
+</div>
+{{ end }}

@@ -10,7 +10,42 @@
   >
     {{ template "navbar" .Context }}
     <div class="flex h-full w-screen flex-col items-center justify-center">
-      <span class="text-3xl font-bold">Upload page Work In Progress</span>
+      <form
+        hx-post="/upload"
+        hx-push-url="false"
+        hx-history="false"
+        hx-encoding="multipart/form-data"
+        class="flex w-full flex-col gap-y-4 p-6 sm:w-[700px]"
+      >
+        <div class="flex w-full items-center pt-6">
+          <span class="text-3xl font-bold">Upload</span>
+          <div class="w-full"></div>
+          <button
+            type="submit"
+            class="rounded-md border bg-black px-4 py-2 font-semibold text-white"
+          >
+            Upload
+          </button>
+        </div>
+
+        <div class="flex flex-col">
+          <label for="title">Title</label>
+          <input
+            id="title"
+            type="text"
+            name="title"
+            minlength="3"
+            maxlength="40"
+            class="w-full rounded-md border border-gray-200 bg-gray-100 px-4 py-2 hover:bg-gray-200"
+            placeholder="Title"
+          />
+        </div>
+
+        <div class="flex flex-col">
+          <label for="image">Image</label>
+          {{ template "image-uploader" . }}
+        </div>
+      </form>
     </div>
   </body>
 </html>

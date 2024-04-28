@@ -54,6 +54,9 @@ func main() {
 	private := e.Group("")
 	private.Use(jwtMiddleware)
 	private.GET("/upload", pages.UploadPage)
+	private.POST("/upload-page/select-image", pages.SelectImagePost)
+	private.POST("/upload-page/deselect-image", pages.DeselectImagePost)
+	private.POST("/upload", pages.UploadImage)
 	private.POST("/auth/logout", auth.LogoutPost)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))

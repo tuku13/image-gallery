@@ -25,3 +25,39 @@ func UploadPage(c echo.Context) error {
 	}
 	return c.Render(200, "upload", data)
 }
+
+func SelectImagePost(c echo.Context) error {
+	file, err := c.FormFile("image")
+	if err != nil {
+		return err
+	}
+
+	return c.Render(200, "image-uploader-control-filled", map[string]interface{}{
+		"Filename": file.Filename,
+	})
+}
+
+func DeselectImagePost(c echo.Context) error {
+	return c.Render(200, "image-uploader", nil)
+}
+
+func UploadImage(c echo.Context) error {
+	title := c.FormValue("title")
+	if title == "" {
+		return c.String(400, "Title is required")
+	}
+
+	file, err := c.FormFile("image")
+	if err != nil {
+		return err
+	}
+	src, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	// TODO save the file to db and redirect to /images/:id
+
+	return c.NoContent(200)
+}
