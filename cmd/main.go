@@ -5,8 +5,12 @@ import (
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	api "github.com/tuku13/image-gallery/api/blob"
 	"github.com/tuku13/image-gallery/auth"
 	"github.com/tuku13/image-gallery/constants"
+	"github.com/tuku13/image-gallery/db/blob"
+	"github.com/tuku13/image-gallery/db/image"
+	"github.com/tuku13/image-gallery/db/user"
 	"github.com/tuku13/image-gallery/pages"
 	"io"
 )
@@ -16,6 +20,10 @@ import (
 )
 
 func main() {
+	user.InitDb()
+	blob.InitDb()
+	image.InitDb()
+
 	e := echo.New()
 
 	e.Renderer = newTemplate()
@@ -50,6 +58,7 @@ func main() {
 	public.POST("/auth/login", auth.LoginPost)
 	public.GET("/register", pages.RegisterPage)
 	public.POST("/auth/register", auth.RegisterPost)
+	public.GET("/blob/:id", api.GetBlob)
 
 	private := e.Group("")
 	private.Use(jwtMiddleware)

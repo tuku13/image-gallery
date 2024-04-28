@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/tuku13/image-gallery/auth"
 	"github.com/tuku13/image-gallery/constants"
+	"github.com/tuku13/image-gallery/db/image"
 )
 
 type FormattedImage struct {
@@ -29,31 +30,25 @@ func IndexPage(c echo.Context) error {
 		}
 	}
 
+	images, err := image.GetImagesOrderByDate("")
+	if err != nil {
+		return c.String(500, "Internal Server Error")
+	}
+
+	formattedImages := make([]FormattedImage, len(images))
+	for i, img := range images {
+		formattedImages[i] = FormattedImage{
+			ID:           img.Id,
+			Title:        img.Title,
+			Date:         img.UploadTime.Format("2006-01-02 15:04"),
+			Url:          "/blob/" + img.BlobId,
+			UploaderName: "TODO",
+		}
+	}
+
 	pageData := IndexPageData{
 		Context: context,
-		Images: []FormattedImage{
-			{ID: "1", Title: "FormattedImage 1FormattedImage 1FormattedImage 1v", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-			{ID: "1", Title: "FormattedImage 1", Date: "2024-04-21 13:50", UploaderName: "user123", Url: "https://placehold.co/600x400@2x.png"},
-		},
+		Images:  formattedImages,
 	}
 
 	return c.Render(200, "index", pageData)

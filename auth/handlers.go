@@ -3,9 +3,10 @@ package auth
 import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/tuku13/image-gallery/constants"
-	"github.com/tuku13/image-gallery/db"
+	"github.com/tuku13/image-gallery/db/user"
 	"net/http"
 	"time"
 )
@@ -16,10 +17,10 @@ type LoginRequestForm struct {
 }
 
 type RegisterRequestForm struct {
-	Username      string `form:"username"`
+	Name          string `form:"name"`
 	Email         string `form:"email"`
 	Password      string `form:"password"`
-	PasswordAgain string `form:"password_again"`
+	PasswordAgain string `form:"passwordAgain"`
 }
 
 type JwtCustomClaims struct {
@@ -29,7 +30,7 @@ type JwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func createJWT(user *db.User, expires time.Time) (string, error) {
+func createJWT(user *user.DbUser, expires time.Time) (string, error) {
 	claims := &JwtCustomClaims{
 		Name:   user.Name,
 		UserID: user.Id,
@@ -54,13 +55,13 @@ func LoginPost(c echo.Context) error {
 		return c.String(400, "Bad Request")
 	}
 
-	user := db.GetUser(loginRequest.Email)
-	if user == nil {
+	loggedInUser, _ := user.GetUserByEmail(loginRequest.Email)
+	if loggedInUser == nil {
 		return c.String(401, "Unauthorized")
 	}
 
 	expires := time.Now().Add(1 * time.Hour)
-	jwtString, err := createJWT(user, expires)
+	jwtString, err := createJWT(loggedInUser, expires)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Could not create JWT token")
 	}
@@ -83,15 +84,41 @@ func RegisterPost(c echo.Context) error {
 		return c.String(400, "Bad Request")
 	}
 
-	// TODO Mock user
-	user := db.GetUser(registerRequest.Email)
-	if user == nil {
-		return c.String(401, "Unauthorized")
+	if registerRequest.Name == "" {
+		return c.String(400, "Username is required")
 	}
-	// TODO
+	if registerRequest.Email == "" {
+		return c.String(400, "Email is required")
+	}
+	if registerRequest.Password == "" {
+		return c.String(400, "Password is required")
+	}
+	if registerRequest.Password != registerRequest.PasswordAgain {
+		return c.String(400, "Passwords do not match")
+	}
+
+	registeredByMail, _ := user.GetUserByEmail(registerRequest.Email)
+	if registeredByMail == nil {
+		return c.String(400, "Email already registered")
+	}
+	registeredByUsername, _ := user.GetUserByName(registerRequest.Name)
+	if registeredByUsername == nil {
+		return c.String(400, "Username already registered")
+	}
+
+	dbUser := user.DbUser{
+		Id:       uuid.New().String(),
+		Name:     registerRequest.Name,
+		Email:    registerRequest.Email,
+		Password: registerRequest.Password,
+	}
+	err := user.InsertUser(&dbUser)
+	if err != nil {
+		return c.String(500, "Could not register user")
+	}
 
 	expires := time.Now().Add(1 * time.Hour)
-	jwtString, err := createJWT(user, expires)
+	jwtString, err := createJWT(&dbUser, expires)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Could not create JWT token")
 	}

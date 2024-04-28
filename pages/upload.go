@@ -2,9 +2,15 @@ package pages
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/tuku13/image-gallery/auth"
 	"github.com/tuku13/image-gallery/constants"
+	"github.com/tuku13/image-gallery/db"
+	"github.com/tuku13/image-gallery/db/blob"
+	"github.com/tuku13/image-gallery/db/image"
+	"io"
+	"time"
 )
 
 type UploadPageData struct {
@@ -42,6 +48,17 @@ func DeselectImagePost(c echo.Context) error {
 }
 
 func UploadImage(c echo.Context) error {
+	var context *auth.JwtCustomClaims
+	token, ok := c.Get(constants.CONTEXT_KEY).(*jwt.Token)
+	if ok && token != nil {
+		if claims, ok := token.Claims.(*auth.JwtCustomClaims); ok {
+			context = claims
+		}
+	}
+	if context == nil {
+		return c.Redirect(302, "/login")
+	}
+
 	title := c.FormValue("title")
 	if title == "" {
 		return c.String(400, "Title is required")
@@ -57,7 +74,33 @@ func UploadImage(c echo.Context) error {
 	}
 	defer src.Close()
 
-	// TODO save the file to db and redirect to /images/:id
+	data, err := io.ReadAll(src)
+	if err != nil {
+		return c.String(500, "Failed to read image")
+	}
 
-	return c.NoContent(200)
+	tx := db.Db.MustBegin()
+
+	blobId := uuid.New().String()
+	dbBlob := &blob.DbBlob{
+		Id:   blobId,
+		Data: data,
+	}
+	blob.InsertBlobTx(tx, dbBlob)
+
+	imageId := uuid.New().String()
+	dbImage := &image.DbImage{
+		Id:         imageId,
+		Title:      title,
+		BlobId:     blobId,
+		UserId:     context.UserID,
+		UploadTime: time.Now(),
+	}
+	image.InsertImageTx(tx, dbImage)
+
+	err = tx.Commit()
+	if err != nil {
+		return c.String(500, "Failed to save image")
+	}
+	return c.Redirect(302, "/images/"+imageId)
 }
