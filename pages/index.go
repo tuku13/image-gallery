@@ -6,6 +6,7 @@ import (
 	"github.com/tuku13/image-gallery/auth"
 	"github.com/tuku13/image-gallery/constants"
 	"github.com/tuku13/image-gallery/db/image"
+	"github.com/tuku13/image-gallery/db/user"
 )
 
 type FormattedImage struct {
@@ -35,14 +36,45 @@ func IndexPage(c echo.Context) error {
 		return c.String(500, "Internal Server Error")
 	}
 
+	userIds := make(map[string]struct{})
+	for _, img := range images {
+		userIds[img.UserId] = struct{}{}
+	}
+	uniqueUserIds := make([]string, 0, len(userIds))
+	for id := range userIds {
+		uniqueUserIds = append(uniqueUserIds, id)
+	}
+
+	users := make([]user.DbUser, len(uniqueUserIds))
+	for i, id := range uniqueUserIds {
+		dbUser, err := user.GetUserById(id)
+		if err != nil {
+			users[i] = user.DbUser{
+				Id:       id,
+				Name:     "Unknown",
+				Email:    "Unknown",
+				Password: "Unknown",
+			}
+		} else {
+			users[i] = *dbUser
+		}
+	}
+
 	formattedImages := make([]FormattedImage, len(images))
 	for i, img := range images {
+		uploaderName := "Unknown"
+		for _, dbUser := range users {
+			if dbUser.Id == img.UserId {
+				uploaderName = dbUser.Name
+				break
+			}
+		}
 		formattedImages[i] = FormattedImage{
 			ID:           img.Id,
 			Title:        img.Title,
 			Date:         img.UploadTime.Format("2006-01-02 15:04"),
 			Url:          "/blob/" + img.BlobId,
-			UploaderName: "TODO",
+			UploaderName: uploaderName,
 		}
 	}
 
