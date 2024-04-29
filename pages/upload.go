@@ -102,5 +102,7 @@ func UploadImage(c echo.Context) error {
 	if err != nil {
 		return c.String(500, "Failed to save image")
 	}
-	return c.Redirect(302, "/images/"+imageId)
+
+	c.Response().Header().Set("HX-Redirect", "/images/"+imageId)
+	return c.String(200, "OK")
 }

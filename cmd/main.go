@@ -5,7 +5,8 @@ import (
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	api "github.com/tuku13/image-gallery/api/blob"
+	blobApi "github.com/tuku13/image-gallery/api/blob"
+	imageApi "github.com/tuku13/image-gallery/api/image"
 	"github.com/tuku13/image-gallery/auth"
 	"github.com/tuku13/image-gallery/constants"
 	"github.com/tuku13/image-gallery/db/blob"
@@ -58,7 +59,7 @@ func main() {
 	public.POST("/auth/login", auth.LoginPost)
 	public.GET("/register", pages.RegisterPage)
 	public.POST("/auth/register", auth.RegisterPost)
-	public.GET("/blob/:id", api.GetBlob)
+	public.GET("/blob/:id", blobApi.GetBlob)
 	public.GET("/images/:id", pages.ImagePage)
 
 	private := e.Group("")
@@ -68,6 +69,7 @@ func main() {
 	private.POST("/upload-page/deselect-image", pages.DeselectImagePost)
 	private.POST("/upload", pages.UploadImage)
 	private.POST("/auth/logout", auth.LogoutPost)
+	private.DELETE("/images/:id", imageApi.DeleteImage)
 
 	e.Logger.Fatal(e.Start(":" + constants.PORT))
 }
