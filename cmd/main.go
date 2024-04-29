@@ -59,6 +59,7 @@ func main() {
 	public.GET("/register", pages.RegisterPage)
 	public.POST("/auth/register", auth.RegisterPost)
 	public.GET("/blob/:id", api.GetBlob)
+	public.GET("/images/:id", pages.ImagePage)
 
 	private := e.Group("")
 	private.Use(jwtMiddleware)

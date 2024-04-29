@@ -93,7 +93,7 @@ func UploadImage(c echo.Context) error {
 		Id:         imageId,
 		Title:      title,
 		BlobId:     blobId,
-		UserId:     context.UserID,
+		UserId:     context.UserId,
 		UploadTime: time.Now(),
 	}
 	image.InsertImageTx(tx, dbImage)

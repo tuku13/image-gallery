@@ -13,5 +13,6 @@ func GetBlob(c echo.Context) error {
 		return c.String(404, "Image blob not found with id "+blobId)
 	}
 
-	return c.Blob(200, "image/jpeg", blobData.Data)
+	c.Response().Header().Set("Cache-Control", "max-age=86400")
+	return c.Blob(200, "image/webp", blobData.Data)
 }

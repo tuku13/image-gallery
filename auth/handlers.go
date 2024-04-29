@@ -25,7 +25,7 @@ type RegisterRequestForm struct {
 
 type JwtCustomClaims struct {
 	Name   string `json:"name"`
-	UserID string `json:"userID"`
+	UserId string `json:"userID"`
 	Email  string `json:"email"`
 	jwt.RegisteredClaims
 }
@@ -33,7 +33,7 @@ type JwtCustomClaims struct {
 func createJWT(user *user.DbUser, expires time.Time) (string, error) {
 	claims := &JwtCustomClaims{
 		Name:   user.Name,
-		UserID: user.Id,
+		UserId: user.Id,
 		Email:  user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Subject:   user.Id,

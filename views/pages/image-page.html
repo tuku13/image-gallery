@@ -1,0 +1,57 @@
+{{ block "image-page" . }}
+<!doctype html>
+<html lang="en">
+  {{ template "head" . }}
+  <body
+    hx-history="false"
+    hx-boost="true"
+    hx-push-url="true"
+    class="flex h-dvh w-screen cursor-default flex-col whitespace-nowrap"
+  >
+    {{ template "navbar" .Context }}
+    <div class="flex h-full w-screen justify-center">
+      <div
+        class="flex h-full w-full flex-col gap-2 p-10 lg:h-[600px] lg:w-[900px] lg:min-w-[900px]"
+      >
+        <div class="flex w-full justify-between">
+          <img
+            hx-get="/"
+            hx-history="true"
+            hx-target="body"
+            src="/static/icons/chevron-left.svg"
+            alt="icon"
+            class="h-8 w-8"
+          />
+          {{ if .Context }} {{ if eq .Context.UserId .Image.UserId }}
+          <button
+            hx-delete="/login"
+            hx-history="false"
+            class="rounded-md border bg-red-500 px-4 py-2 font-semibold text-white"
+          >
+            Delete
+          </button>
+          {{ end }} {{ end }}
+        </div>
+        <img
+          class="h-full w-full rounded-md border object-cover"
+          src="{{ .Image.Url }}"
+          alt="image"
+        />
+        <div class="flex w-full flex-col justify-start gap-y-1 px-2">
+          <span class="text-wrap pb-1 text-2xl font-semibold"
+            >{{ .Image.Title }}</span
+          >
+          <div class="flex items-center gap-x-2 text-sm">
+            <img src="/static/icons/user.svg" alt="icon" class="h-4 w-4" />
+            <span>{{ .Image.UploaderName }}</span>
+          </div>
+          <div class="flex items-center gap-x-2 text-sm">
+            <img src="/static/icons/calendar.svg" alt="icon" class="h-4 w-4" />
+            <span>{{ .Image.Date }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+{{ end }}

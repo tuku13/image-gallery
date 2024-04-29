@@ -10,11 +10,12 @@ import (
 )
 
 type FormattedImage struct {
-	ID           string
+	Id           string
 	Title        string
 	Date         string
 	Url          string
 	UploaderName string
+	UserId       string
 }
 
 type IndexPageData struct {
@@ -70,11 +71,12 @@ func IndexPage(c echo.Context) error {
 			}
 		}
 		formattedImages[i] = FormattedImage{
-			ID:           img.Id,
+			Id:           img.Id,
 			Title:        img.Title,
 			Date:         img.UploadTime.Format("2006-01-02 15:04"),
 			Url:          "/blob/" + img.BlobId,
 			UploaderName: uploaderName,
+			UserId:       img.UserId,
 		}
 	}
 
