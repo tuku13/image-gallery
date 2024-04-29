@@ -51,7 +51,12 @@ func DeleteImage(id string) error {
 
 func GetImagesOrderByTitle(query string) ([]DbImage, error) {
 	var images []DbImage
-	err := db.Db.Select(&images, "SELECT * FROM images WHERE title like $1 ORDER BY title", query)
+	var err error
+	if query == "" {
+		err = db.Db.Select(&images, "SELECT * FROM images ORDER BY title DESC")
+	} else {
+		err = db.Db.Select(&images, "SELECT * FROM images WHERE title ilike $1 ORDER BY title DESC", "%"+query+"%")
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +65,11 @@ func GetImagesOrderByTitle(query string) ([]DbImage, error) {
 
 func GetImagesOrderByDate(query string) ([]DbImage, error) {
 	var images []DbImage
-
 	var err error
 	if query == "" {
 		err = db.Db.Select(&images, "SELECT * FROM images ORDER BY upload_time DESC")
 	} else {
-		err = db.Db.Select(&images, "SELECT * FROM images WHERE title like $1 ORDER BY upload_time DESC", query)
+		err = db.Db.Select(&images, "SELECT * FROM images WHERE title ilike $1 ORDER BY upload_time DESC", "%"+query+"%")
 	}
 	if err != nil {
 		return nil, err

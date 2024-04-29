@@ -8,8 +8,12 @@
       <div class="w-full rounded-md border border-gray-300">
         <label for="searchbar"></label>
         <input
-          name="searchbar"
+          name="query"
           id="searchbar"
+          hx-get="ordered_images"
+          hx-history="false"
+          hx-target="#images"
+          hx-include="#order_by"
           class="h-12 w-full rounded-md px-4"
           type="text"
           placeholder="Search for images"
@@ -22,9 +26,16 @@
     >
       <label>
         Order by:
-        <select name="order_by" id="order_by">
-          <option value="date">Date</option>
-          <option value="name">Name</option>
+        <select
+          name="order_by"
+          id="order_by"
+          hx-get="ordered_images"
+          hx-history="false"
+          hx-include="#searchbar"
+          hx-target="#images"
+        >
+          <option {{ if eq .Order "date" }} selected {{ end }} value="date">Date</option>
+          <option {{ if eq .Order "title" }} selected {{ end }} value="title">Title</option>
         </select>
       </label>
       {{ with .Context }}
@@ -40,7 +51,7 @@
       id="images"
       class="flex h-fit w-screen flex-grow-0 flex-wrap content-start items-start justify-center gap-4 overflow-y-scroll px-4 pb-4 md:justify-start"
     >
-      {{ range .Images }} {{ template "image-preview" . }} {{ end }}
+      {{ template "images" . }}
     </div>
   </body>
 </html>

@@ -21,6 +21,7 @@ type FormattedImage struct {
 type IndexPageData struct {
 	Context *auth.JwtCustomClaims
 	Images  []FormattedImage
+	Order   string
 }
 
 func IndexPage(c echo.Context) error {
@@ -32,9 +33,17 @@ func IndexPage(c echo.Context) error {
 		}
 	}
 
-	images, err := image.GetImagesOrderByDate("")
+	var images []image.DbImage
+	var err error
+	query := c.QueryParam("query")
+	orderBy := c.QueryParam("order_by")
+	if orderBy == "title" {
+		images, err = image.GetImagesOrderByTitle(query)
+	} else {
+		images, err = image.GetImagesOrderByDate(query)
+	}
 	if err != nil {
-		return c.String(500, "Internal Server Error")
+		return c.String(500, "Failed to get images")
 	}
 
 	userIds := make(map[string]struct{})
@@ -83,6 +92,7 @@ func IndexPage(c echo.Context) error {
 	pageData := IndexPageData{
 		Context: context,
 		Images:  formattedImages,
+		Order:   orderBy,
 	}
 
 	return c.Render(200, "index", pageData)

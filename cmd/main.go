@@ -61,6 +61,7 @@ func main() {
 	public.POST("/auth/register", auth.RegisterPost)
 	public.GET("/blob/:id", blobApi.GetBlob)
 	public.GET("/images/:id", pages.ImagePage)
+	public.GET("/ordered_images", imageApi.OrderedImages)
 
 	private := e.Group("")
 	private.Use(jwtMiddleware)
