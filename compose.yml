@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  database:
+    build:
+      dockerfile: Dockerfile
+      context: db
+    image: image-gallery/image-gallery-db
+    container_name: image-gallery-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: image-gallery-db
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      PGDATA: /var/lib/postgresql/data
+    networks:
+      - image-gallery-network
+
+  webapp:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    image: image-gallery/image-gallery-webapp
+    container_name: image-gallery-webapp
+    ports:
+      - "8080:80"
+    environment:
+      DB_NAME: image-gallery-db
+      DB_USER: test
+      DB_PASS: test
+      DB_PORT: 5432
+      DB_HOST: database
+    depends_on:
+      - database
+    restart: unless-stopped
+    networks:
+      - image-gallery-network
+
+networks:
+  image-gallery-network:
+    driver: bridge
