@@ -69,9 +69,9 @@ func New() Service {
 	}
 }
 func (s *service) mustInit() {
+	s.db.MustExec(userSchema)
 	s.db.MustExec(blobSchema)
 	s.db.MustExec(imageSchema)
-	s.db.MustExec(userSchema)
 }
 
 func (s *service) GetBlob(id string) (*Blob, error) {

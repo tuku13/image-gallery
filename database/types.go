@@ -2,6 +2,14 @@ package database
 
 import "time"
 
+const userSchema = `
+	CREATE TABLE IF NOT EXISTS users(
+		id UUID PRIMARY KEY,
+		name TEXT,
+		email TEXT,
+		password TEXT
+	);
+`
 const blobSchema = `
 	CREATE TABLE IF NOT EXISTS blobs(
 	    id UUID PRIMARY KEY,
@@ -15,14 +23,6 @@ const imageSchema = `
 	    user_Id UUID REFERENCES users(id),
 	    blob_id UUID REFERENCES blobs(id) ON DELETE CASCADE,
 	    upload_time timestamp
-	);
-`
-const userSchema = `
-	CREATE TABLE IF NOT EXISTS users(
-		id UUID PRIMARY KEY,
-		name TEXT,
-		email TEXT,
-		password TEXT
 	);
 `
 
