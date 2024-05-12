@@ -1,4 +1,4 @@
-package auth
+package api
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/tuku13/image-gallery/constants"
-	"github.com/tuku13/image-gallery/db/user"
+	"github.com/tuku13/image-gallery/database"
 	"net/http"
 	"time"
 )
@@ -30,32 +30,14 @@ type JwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func createJWT(user *user.DbUser, expires time.Time) (string, error) {
-	claims := &JwtCustomClaims{
-		Name:   user.Name,
-		UserId: user.Id,
-		Email:  user.Email,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   user.Id,
-			ExpiresAt: jwt.NewNumericDate(expires),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(constants.JWT_SECRET))
-	if err != nil {
-		return "", err
-	}
-	return tokenString, nil
-}
-
-func LoginPost(c echo.Context) error {
+func (s *Server) handlePOSTLogin(c echo.Context) error {
 	var loginRequest LoginRequestForm
 	if err := c.Bind(&loginRequest); err != nil {
 		fmt.Println(err)
 		return c.String(400, "Bad Request")
 	}
 
-	loggedInUser, _ := user.GetUserByEmail(loginRequest.Email)
+	loggedInUser, _ := s.db.GetUserByEmail(loginRequest.Email)
 	if loggedInUser == nil {
 		return c.String(401, "Unauthorized")
 	}
@@ -77,8 +59,7 @@ func LoginPost(c echo.Context) error {
 	c.Response().Header().Set("HX-Redirect", "/")
 	return c.NoContent(200)
 }
-
-func RegisterPost(c echo.Context) error {
+func (s *Server) handleRegister(c echo.Context) error {
 	var registerRequest RegisterRequestForm
 	if err := c.Bind(&registerRequest); err != nil {
 		return c.String(400, "Bad Request")
@@ -97,22 +78,22 @@ func RegisterPost(c echo.Context) error {
 		return c.String(400, "Passwords do not match")
 	}
 
-	registeredByMail, _ := user.GetUserByEmail(registerRequest.Email)
+	registeredByMail, _ := s.db.GetUserByEmail(registerRequest.Email)
 	if registeredByMail == nil {
 		return c.String(400, "Email already registered")
 	}
-	registeredByUsername, _ := user.GetUserByName(registerRequest.Name)
+	registeredByUsername, _ := s.db.GetUserByName(registerRequest.Name)
 	if registeredByUsername == nil {
 		return c.String(400, "Username already registered")
 	}
 
-	dbUser := user.DbUser{
+	dbUser := database.User{
 		Id:       uuid.New().String(),
 		Name:     registerRequest.Name,
 		Email:    registerRequest.Email,
 		Password: registerRequest.Password,
 	}
-	err := user.InsertUser(&dbUser)
+	err := s.db.InsertUser(&dbUser)
 	if err != nil {
 		return c.String(500, "Could not register user")
 	}
@@ -134,8 +115,7 @@ func RegisterPost(c echo.Context) error {
 	c.Response().Header().Set("HX-Redirect", "/")
 	return c.NoContent(200)
 }
-
-func LogoutPost(c echo.Context) error {
+func (s *Server) handleLogout(c echo.Context) error {
 	var cookie *http.Cookie
 	cookie, err := c.Cookie("auth")
 	if err != nil {
@@ -151,4 +131,22 @@ func LogoutPost(c echo.Context) error {
 
 	c.Response().Header().Set("HX-Redirect", "/")
 	return c.NoContent(200)
+}
+
+func createJWT(user *database.User, expires time.Time) (string, error) {
+	claims := &JwtCustomClaims{
+		Name:   user.Name,
+		UserId: user.Id,
+		Email:  user.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   user.Id,
+			ExpiresAt: jwt.NewNumericDate(expires),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(constants.JWT_SECRET))
+	if err != nil {
+		return "", err
+	}
+	return tokenString, nil
 }
