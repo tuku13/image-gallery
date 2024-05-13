@@ -57,7 +57,7 @@ func (s *Server) registerHandlers() {
 	public.Use(checkJwtMiddleware)
 	public.GET("/", s.handleIndexPage)
 	public.GET("/login", s.handleLoginPage)
-	public.POST("/auth/login", s.handlePOSTLogin)
+	public.POST("/auth/login", s.handleLogin)
 	public.GET("/register", s.handleRegisterPage)
 	public.POST("/auth/register", s.handleRegister)
 	public.GET("/blob/:id", s.handleGetBlob)

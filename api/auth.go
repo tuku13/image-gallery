@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/tuku13/image-gallery/constants"
 	"github.com/tuku13/image-gallery/database"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"time"
 )
@@ -30,7 +31,7 @@ type JwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func (s *Server) handlePOSTLogin(c echo.Context) error {
+func (s *Server) handleLogin(c echo.Context) error {
 	var loginRequest LoginRequestForm
 	if err := c.Bind(&loginRequest); err != nil {
 		fmt.Println(err)
@@ -38,7 +39,12 @@ func (s *Server) handlePOSTLogin(c echo.Context) error {
 	}
 
 	loggedInUser, _ := s.db.GetUserByEmail(loginRequest.Email)
+	fmt.Println(loggedInUser)
 	if loggedInUser == nil {
+		return c.String(401, "Unauthorized")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(loggedInUser.Password), []byte(loginRequest.Password)); err != nil {
 		return c.String(401, "Unauthorized")
 	}
 
@@ -87,13 +93,18 @@ func (s *Server) handleRegister(c echo.Context) error {
 		return c.String(400, "Username already registered")
 	}
 
+	hashedPassword, err := hashPassword(registerRequest.Password)
+	if err != nil {
+		return c.String(500, err.Error())
+	}
+
 	dbUser := database.User{
 		Id:       uuid.New().String(),
 		Name:     registerRequest.Name,
 		Email:    registerRequest.Email,
-		Password: registerRequest.Password,
+		Password: hashedPassword,
 	}
-	err := s.db.InsertUser(&dbUser)
+	err = s.db.InsertUser(&dbUser)
 	if err != nil {
 		return c.String(500, "Could not register user")
 	}
@@ -149,4 +160,12 @@ func createJWT(user *database.User, expires time.Time) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+func hashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
 }
